@@ -13,10 +13,10 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="account-manager" target="1.5" />
-      <module name="banking-api-service" target="1.5" />
-      <module name="reporting-service" target="1.5" />
-      <module name="user-notification-service" target="1.5" />
+      <module name="account-manager" target="11" />
+      <module name="banking-api-service" target="11" />
+      <module name="reporting-service" target="11" />
+      <module name="user-notification-service" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>

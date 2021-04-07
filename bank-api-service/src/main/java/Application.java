@@ -23,6 +23,7 @@
  */
 
 import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
@@ -52,14 +53,22 @@ public class Application {
     public static void processTransactions(IncomingTransactionsReader incomingTransactionsReader,
                                            UserResidenceDatabase userResidenceDatabase,
                                            Producer<String, Transaction> kafkaProducer) throws ExecutionException, InterruptedException {
-
+        int partition = 1;
         while (incomingTransactionsReader.hasNext()) {
             Transaction transaction = incomingTransactionsReader.next();
+            String TOPIC = VALID_TRANSACTIONS_TOPIC;
+            long timeStamp = System.currentTimeMillis();
 
-            /**
-             * Fill in you code here.
-             * Send the transaction to the right topic based on the origin of the transaction and the user's residence data
-             */
+            if(!transaction.getTransactionLocation().equalsIgnoreCase(userResidenceDatabase.getUserResidence(transaction.getUser()))) {
+                TOPIC = SUSPICIOUS_TRANSACTIONS_TOPIC;
+            }
+
+            ProducerRecord<String, Transaction> record = new ProducerRecord<>(TOPIC, partition, timeStamp, transaction.getUser(), transaction);
+
+            RecordMetadata recordMetadata = kafkaProducer.send(record).get();
+
+            System.out.println(String.format("Transaction with (key: %s, value: %s), was sent to (partition: %d, offset: %d",
+                    record.key(), record.value(), recordMetadata.partition(), recordMetadata.offset()));
         }
     }
 
@@ -68,8 +77,8 @@ public class Application {
 
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         properties.put(ProducerConfig.CLIENT_ID_CONFIG, "banking-api-service");
-        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, /** Fill in your code **/);
-        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,  /** Fill in your code **/);
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, Transaction.TransactionSerializer.class.getName());
 
         return new KafkaProducer<>(properties);
     }

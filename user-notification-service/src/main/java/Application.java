@@ -23,6 +23,7 @@
  */
 
 import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
@@ -45,19 +46,40 @@ public class Application {
     }
 
     public static void consumeMessages(String topic, Consumer<String, Transaction> kafkaConsumer) {
-        /**
-         * Fill in the code here to subscribe to the right topic.
-         * Run in a loop and read incoming transactions
-         * For each new transaction, send a notification to the user
-         */
+        kafkaConsumer.subscribe(Collections.singletonList(topic));
+
+        try {
+            while (true) {
+                ConsumerRecords<String, Transaction> consumerRecords = kafkaConsumer.poll(Duration.ofSeconds(1));
+
+                if (consumerRecords.isEmpty()) {
+
+                    Thread.sleep(500);
+                    continue;
+                }
+
+                for (ConsumerRecord<String, Transaction> record : consumerRecords) {
+                    System.out.println(String.format("Received transaction (key: %s, value: %s, partition: %d, offset: %d",
+                            record.key(), record.value().toString(), record.partition(), record.offset()));
+                    sendUserNotification(record.value());
+                }
+
+
+                kafkaConsumer.commitAsync();
+                Thread.sleep(500);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public static Consumer<String, Transaction> createKafkaConsumer(String bootstrapServers, String consumerGroup) {
         Properties properties = new Properties();
 
-        /**
-         * Fill in the code here to configure the rest of the Kafka client parameters
-         */
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, Transaction.TransactionDeserializer.class.getName());
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, consumerGroup);
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
 
         return new KafkaConsumer<>(properties);
