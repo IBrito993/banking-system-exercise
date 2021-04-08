@@ -137,3 +137,5 @@ bin/windows/kafka-topics.bat --list --bootstrap-server localhost:9092
 
 Part 2 - Launching Services
 Launch Account Manager Service, User Notification Service and Reporting, Banking API Service (Banking API Service should be launched last).
+
+It can also be launched using docker-compose.
