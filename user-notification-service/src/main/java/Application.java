@@ -34,6 +34,7 @@ import java.util.Properties;
 public class Application {
     private static final String SUSPICIOUS_TRANSACTIONS_TOPIC = "suspicious-transactions";
     private static final String BOOTSTRAP_SERVERS = "localhost:9092,localhost:9093,localhost:9094";
+    //private static final String BOOTSTRAP_SERVERS = "kafka:9092,kafka:9093,kafka:9094"; // When running on docker with kafka on the same network
 
     public static void main(String[] args) {
         String consumerGroup = "user-notification-service";

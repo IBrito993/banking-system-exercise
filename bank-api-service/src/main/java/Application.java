@@ -37,6 +37,8 @@ public class Application {
 
     private static final String BOOTSTRAP_SERVERS = "localhost:9092,localhost:9093,localhost:9094";
 
+    //private static final String BOOTSTRAP_SERVERS = "kafka:9092,kafka:9093,kafka:9094"; // When running on docker with kafka on the same network
+
     public static void main(String[] args) {
         Producer<String, Transaction> kafkaProducer = createKafkaProducer(BOOTSTRAP_SERVERS);
 
@@ -53,7 +55,7 @@ public class Application {
     public static void processTransactions(IncomingTransactionsReader incomingTransactionsReader,
                                            UserResidenceDatabase userResidenceDatabase,
                                            Producer<String, Transaction> kafkaProducer) throws ExecutionException, InterruptedException {
-        int partition = 1;
+        int partition = 0;
         while (incomingTransactionsReader.hasNext()) {
             Transaction transaction = incomingTransactionsReader.next();
             String TOPIC = VALID_TRANSACTIONS_TOPIC;

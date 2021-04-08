@@ -33,7 +33,7 @@ import java.util.Properties;
 public class Application {
     private static final String VALID_TRANSACTIONS_TOPIC = "valid-transactions";
     private static final String BOOTSTRAP_SERVERS = "localhost:9092,localhost:9093,localhost:9094";
-
+    //private static final String BOOTSTRAP_SERVERS = "kafka:9092,kafka:9093,kafka:9094"; // When running on docker with kafka on the same network
     public static void main(String[] args) {
         String consumerGroup = "account-manager";
 
@@ -52,14 +52,14 @@ public class Application {
                 ConsumerRecords<String, Transaction> consumerRecords = kafkaConsumer.poll(Duration.ofSeconds(1));
 
                 if (consumerRecords.isEmpty()) {
-
                     Thread.sleep(500);
                     continue;
                 }
 
                 for (ConsumerRecord<String, Transaction> record : consumerRecords) {
+
                     System.out.println(String.format("Received transaction (key: %s, value: %s, partition: %d, offset: %d",
-                            record.key(), record.value().toString(), record.partition(), record.offset()));
+                           record.key(), record.value().toString(), record.partition(), record.offset()));
                     approveTransaction(record.value());
                 }
 
